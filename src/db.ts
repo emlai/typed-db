@@ -1,5 +1,6 @@
 import fs from 'fs'
 import { promisify } from 'util'
+import _ from 'lodash'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
@@ -47,8 +48,8 @@ function createDatabaseInterface<Tables>(
       return this
     },
 
-    getAll<TableName extends keyof Tables>(table: TableName): readonly (Tables[TableName])[] {
-      return this.tables[table].rows
+    getAll<TableName extends keyof Tables>(table: TableName, conditions?: Partial<Tables[TableName]>): readonly (Tables[TableName])[] {
+      return this.tables[table].rows.filter(_.matches(conditions))
     }
   }
 }

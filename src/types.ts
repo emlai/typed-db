@@ -36,6 +36,11 @@ interface Database<Tables> {
   ): Database<Tables>
 
   getAll<TableName extends keyof Tables>(table: TableName): readonly (Tables[TableName])[]
+
+  getAll<TableName extends keyof Tables>(
+    table: TableName,
+    conditions: Partial<Tables[TableName]>
+  ): readonly (Tables[TableName])[]
 }
 
 interface Table<Row> {
