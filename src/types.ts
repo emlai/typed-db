@@ -17,6 +17,4 @@ interface Column {
   type: Type
 }
 
-type Type =
-  | 'number'
-  | 'string'
+type Type = 'number' | 'string'

@@ -16,7 +16,7 @@ function createTableInterface(name: string): Table {
 
     addColumn(name: string, type: Type): void {
       this.columns.push({ name, type })
-    },
+    }
   }
 }
 
@@ -29,7 +29,7 @@ function createDatabaseInterface(name: string, tables: Table[]): Database {
       const table = createTableInterface(name)
       this.tables.push(table)
       return table
-    },
+    }
   }
 }
 
