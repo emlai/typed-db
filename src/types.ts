@@ -1,6 +1,6 @@
 interface Database {
   name: string
-  tables: Table[]
+  tables: Record<string, Table>
 
   createTable(name: string): Table
 }

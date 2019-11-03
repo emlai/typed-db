@@ -7,5 +7,5 @@ test('columns can be added', async () => {
     table.addColumn('price', 'number')
   })
 
-  expect(db.tables[0].columns).toStrictEqual([{ name: 'id', type: 'string' }, { name: 'price', type: 'number' }])
+  expect(db.tables.orders.columns).toStrictEqual([{ name: 'id', type: 'string' }, { name: 'price', type: 'number' }])
 })

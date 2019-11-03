@@ -5,7 +5,9 @@ test('table can be created', async () => {
     db.createTable('orders')
   })
 
-  expect(db.tables).toEqual([{ name: 'orders', columns: [] }])
+  expect(db.tables).toEqual({
+    orders: { name: 'orders', columns: [] }
+  })
 })
 
 test('multiple tables can be created', async () => {
@@ -14,5 +16,8 @@ test('multiple tables can be created', async () => {
     db.createTable('customers')
   })
 
-  expect(db.tables).toStrictEqual([{ name: 'orders', columns: [] }, { name: 'customers', columns: [] }])
+  expect(db.tables).toStrictEqual({
+    orders: { name: 'orders', columns: [] },
+    customers: { name: 'customers', columns: [] }
+  })
 })

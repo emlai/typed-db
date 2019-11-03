@@ -20,21 +20,21 @@ function createTableInterface(name: string): Table {
   }
 }
 
-function createDatabaseInterface(name: string, tables: Table[]): Database {
+function createDatabaseInterface(name: string, tables: Record<string, Table>): Database {
   return {
     name,
     tables,
 
     createTable(name: string): Table {
       const table = createTableInterface(name)
-      this.tables.push(table)
+      this.tables[name] = table
       return table
     }
   }
 }
 
 export function createDatabase(name: string): Database {
-  return createDatabaseInterface(name, [])
+  return createDatabaseInterface(name, {})
 }
 
 export async function saveDatabase(db: Database): Promise<void> {
