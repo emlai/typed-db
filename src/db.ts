@@ -25,7 +25,7 @@ function createDatabaseInterface(name: string, tables: Table[]): Database {
     name,
     tables,
 
-    createTable(name: string) {
+    createTable(name: string): Table {
       const table = createTableInterface(name)
       this.tables.push(table)
       return table
