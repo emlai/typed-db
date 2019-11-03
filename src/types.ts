@@ -1,15 +1,45 @@
-interface Database {
-  name: string
-  tables: Record<string, Table>
+type AddColumn<Tables, TableName extends keyof Tables, Name extends string, ColumnType> = Database<
+  Tables & { [k in TableName]: Tables[TableName] & { [k in Name]: ColumnType } }
+>
 
-  createTable(name: string): Table
+type TablesObject<Tables> = { [k in keyof Tables]: Table<Tables[k]> }
+
+interface Database<Tables> {
+  name: string
+  tables: TablesObject<Tables>
+
+  createTable<Name extends string>(name: Name): Database<Tables & { [k in Name]: {} }>
+
+  addColumn<TableName extends keyof Tables, Name extends string>(
+    table: TableName,
+    name: Name,
+    type: Type
+  ): AddColumn<Tables, TableName, Name, Type>
+
+  addColumn<TableName extends keyof Tables, Name extends string>(
+    table: TableName,
+    name: Name,
+    type: 'number'
+  ): AddColumn<Tables, TableName, Name, number>
+
+  addColumn<TableName extends keyof Tables, Name extends string>(
+    table: TableName,
+    name: Name,
+    type: 'string'
+  ): AddColumn<Tables, TableName, Name, string>
+
+  insert<TableName extends keyof Tables>(table: TableName, row: Tables[TableName]): Database<Tables>
+
+  insertMultiple<TableName extends keyof Tables>(
+    table: TableName,
+    rows: readonly (Tables[TableName])[]
+  ): Database<Tables>
 }
 
-interface Table {
+interface Table<Row> {
   name: string
   columns: Column[]
-
-  addColumn(name: string, type: string): void
+  rows: Row[]
 }
 
 interface Column {

@@ -6,7 +6,8 @@
   "plugins": ["@typescript-eslint"],
   "extends": [
     "eslint:recommended",
-    "plugin:@typescript-eslint/recommended"
+    "plugin:@typescript-eslint/recommended",
+    "prettier"
   ],
   "rules": {
     "indent": "off",
@@ -14,7 +15,6 @@
     "object-curly-spacing": ["error", "always"],
     "quotes": ["error", "single"],
     "semi": ["error", "never"],
-    "@typescript-eslint/indent": ["error", 2],
     "@typescript-eslint/member-delimiter-style": ["error", { "multiline": { "delimiter": "none" } }]
   }
 }

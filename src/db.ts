@@ -9,39 +9,59 @@ function createDatabaseFilename(name: string): string {
   return name + '.db'
 }
 
-function createTableInterface(name: string): Table {
+function createTableInterface(name: string): Table<{}> {
   return {
     name,
     columns: [],
-
-    addColumn(name: string, type: Type): void {
-      this.columns.push({ name, type })
-    }
+    rows: []
   }
 }
 
-function createDatabaseInterface(name: string, tables: Record<string, Table>): Database {
+function createDatabaseInterface<Tables>(
+  name: string,
+  tables: TablesObject<Tables>
+): Database<Tables> {
   return {
     name,
     tables,
 
-    createTable(name: string): Table {
-      const table = createTableInterface(name)
-      this.tables[name] = table
-      return table
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    createTable<Name extends string>(name: Name) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tables = this.tables as any
+      tables[name] = createTableInterface(name)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return this as any
+    },
+
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    addColumn(table: keyof Tables, name: string, type: Type) {
+      this.tables[table].columns.push({ name, type })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return this as any
+    },
+
+    insert<TableName extends keyof Tables>(table: TableName, row: Tables[TableName]): Database<Tables> {
+      this.tables[table].rows.push(row)
+      return this
+    },
+
+    insertMultiple<TableName extends keyof Tables>(table: TableName, rows: readonly (Tables[TableName])[]): Database<Tables> {
+      this.tables[table].rows.push(...rows)
+      return this
     }
   }
 }
 
-export function createDatabase(name: string): Database {
+export function createDatabase(name: string): Database<{}> {
   return createDatabaseInterface(name, {})
 }
 
-export async function saveDatabase(db: Database): Promise<void> {
+export async function saveDatabase(db: Database<{}>): Promise<void> {
   await writeFile(createDatabaseFilename(db.name), JSON.stringify(db.tables))
 }
 
-export async function loadDatabase(name: string): Promise<Database> {
+export async function loadDatabase<Tables>(name: string): Promise<Database<Tables>> {
   const buffer = await readFile(createDatabaseFilename(name))
   const tables = await JSON.parse(buffer.toString())
   return createDatabaseInterface(name, tables)
