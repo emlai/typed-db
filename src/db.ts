@@ -45,6 +45,10 @@ function createDatabaseInterface<Tables>(
     insertMultiple<TableName extends keyof Tables>(table: TableName, rows: readonly (Tables[TableName])[]): Database<Tables> {
       this.tables[table].rows.push(...rows)
       return this
+    },
+
+    getAll<TableName extends keyof Tables>(table: TableName): readonly (Tables[TableName])[] {
+      return this.tables[table].rows
     }
   }
 }

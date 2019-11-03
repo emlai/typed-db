@@ -34,6 +34,8 @@ interface Database<Tables> {
     table: TableName,
     rows: readonly (Tables[TableName])[]
   ): Database<Tables>
+
+  getAll<TableName extends keyof Tables>(table: TableName): readonly (Tables[TableName])[]
 }
 
 interface Table<Row> {
