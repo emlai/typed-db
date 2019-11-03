@@ -9,13 +9,26 @@ function createDatabaseFilename(name: string): string {
   return name + '.db'
 }
 
+function createTableInterface(name: string): Table {
+  return {
+    name,
+    columns: [],
+
+    addColumn(name: string, type: Type): void {
+      this.columns.push({ name, type })
+    },
+  }
+}
+
 function createDatabaseInterface(name: string, tables: Table[]): Database {
   return {
     name,
     tables,
 
     createTable(name: string) {
-      this.tables.push({ name })
+      const table = createTableInterface(name)
+      this.tables.push(table)
+      return table
     },
   }
 }
