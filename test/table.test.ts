@@ -14,9 +14,5 @@ test('multiple tables can be created', async () => {
     db.createTable('customers')
   })
 
-  expect(db.tables).toHaveLength(2)
-  expect(db.tables).toEqual(expect.arrayContaining([
-    { name: 'orders', columns: [] },
-    { name: 'customers', columns: [] }
-  ]))
+  expect(db.tables).toStrictEqual([{ name: 'orders', columns: [] }, { name: 'customers', columns: [] }])
 })
