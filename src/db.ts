@@ -5,10 +5,6 @@ const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const unlink = promisify(fs.unlink)
 
-function createDatabaseFilename(name: string): string {
-  return name + '.db'
-}
-
 function createTableInterface(name: string): Table<{}> {
   return {
     name,
@@ -57,16 +53,16 @@ export function createDatabase(name: string): Database<{}> {
   return createDatabaseInterface(name, {})
 }
 
-export async function saveDatabase(db: Database<{}>): Promise<void> {
-  await writeFile(createDatabaseFilename(db.name), JSON.stringify(db.tables))
+export async function saveDatabase(db: Database<{}>, path: string): Promise<void> {
+  await writeFile(path, JSON.stringify(db.tables))
 }
 
-export async function loadDatabase<Tables>(name: string): Promise<Database<Tables>> {
-  const buffer = await readFile(createDatabaseFilename(name))
+export async function loadDatabase<Tables>(path: string): Promise<Database<Tables>> {
+  const buffer = await readFile(path)
   const tables = await JSON.parse(buffer.toString())
   return createDatabaseInterface(name, tables)
 }
 
-export async function deleteDatabase(name: string): Promise<void> {
-  await unlink(createDatabaseFilename(name))
+export async function deleteDatabase(path: string): Promise<void> {
+  await unlink(path)
 }
