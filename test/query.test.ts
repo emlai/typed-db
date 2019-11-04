@@ -5,9 +5,9 @@ import { Type } from '../src/types'
 function createTestDatabase() {
   return runTestMigration(db =>
     db
-      .createTable('orders')
-      .addColumn('orders', 'id', Type.string)
-      .addColumn('orders', 'price', Type.number)
+      .createCollection('orders')
+      .addProperty('orders', 'id', Type.string)
+      .addProperty('orders', 'price', Type.number)
       .insertMultiple('orders', [{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
   )
 }

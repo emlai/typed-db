@@ -1,63 +1,72 @@
 import fs from 'fs'
 import { promisify } from 'util'
 import { matches } from 'lodash'
-import { Database, Table, TablesObject, Type } from './types'
+import { Database, Collection, CollectionsMap, Type } from './types'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const unlink = promisify(fs.unlink)
 
-function createTableInterface(name: string): Table<{}> {
+function createCollectionInterface(name: string): Collection<{}> {
   return {
     name,
-    columns: [],
-    rows: []
+    properties: [],
+    objects: []
   }
 }
 
-function createDatabaseInterface<Tables>(name: string, tables: TablesObject<Tables>): Database<Tables> {
+function createDatabaseInterface<Collections>(
+  name: string,
+  collections: CollectionsMap<Collections>
+): Database<Collections> {
   return {
     name,
-    tables,
+    collections,
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    createTable<Name extends string>(name: Name) {
+    createCollection<Name extends string>(name: Name) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const tables = this.tables as any
-      tables[name] = createTableInterface(name)
+      const collections = this.collections as any
+      collections[name] = createCollectionInterface(name)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return this as any
     },
 
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-    addColumn(table: keyof Tables, name: string, type: Type) {
-      this.tables[table].columns.push({ name, type })
+    addProperty(collection: keyof Collections, name: string, type: Type) {
+      this.collections[collection].properties.push({ name, type })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return this as any
     },
 
-    insert<TableName extends keyof Tables>(table: TableName, row: Tables[TableName]): Database<Tables> {
-      this.tables[table].rows.push(row)
+    insert<CollectionName extends keyof Collections>(
+      collection: CollectionName,
+      object: Collections[CollectionName]
+    ): Database<Collections> {
+      this.collections[collection].objects.push(object)
       return this
     },
 
-    insertMultiple<TableName extends keyof Tables>(
-      table: TableName,
-      rows: readonly (Tables[TableName])[]
-    ): Database<Tables> {
-      this.tables[table].rows.push(...rows)
+    insertMultiple<CollectionName extends keyof Collections>(
+      collection: CollectionName,
+      objects: readonly (Collections[CollectionName])[]
+    ): Database<Collections> {
+      this.collections[collection].objects.push(...objects)
       return this
     },
 
-    getAll<TableName extends keyof Tables>(
-      table: TableName,
-      conditions?: Partial<Tables[TableName]>
-    ): readonly (Tables[TableName])[] {
-      return this.tables[table].rows.filter(matches(conditions))
+    getAll<CollectionName extends keyof Collections>(
+      collection: CollectionName,
+      conditions?: Partial<Collections[CollectionName]>
+    ): readonly (Collections[CollectionName])[] {
+      return this.collections[collection].objects.filter(matches(conditions))
     },
 
-    update<TableName extends keyof Tables>(table: TableName, updates: Partial<Tables[TableName]>): Database<Tables> {
-      this.tables[table].rows.forEach(row => Object.assign(row, updates))
+    update<CollectionName extends keyof Collections>(
+      collection: CollectionName,
+      updates: Partial<Collections[CollectionName]>
+    ): Database<Collections> {
+      this.collections[collection].objects.forEach(object => Object.assign(object, updates))
       return this
     }
   }
@@ -68,13 +77,13 @@ export function createDatabase(name: string): Database<{}> {
 }
 
 export async function saveDatabase(db: Database<{}>, path: string): Promise<void> {
-  await writeFile(path, JSON.stringify(db.tables))
+  await writeFile(path, JSON.stringify(db.collections))
 }
 
-export async function loadDatabase<Tables>(path: string): Promise<Database<Tables>> {
+export async function loadDatabase<Collections>(path: string): Promise<Database<Collections>> {
   const buffer = await readFile(path)
-  const tables = await JSON.parse(buffer.toString())
-  return createDatabaseInterface(name, tables)
+  const collections = await JSON.parse(buffer.toString())
+  return createDatabaseInterface(name, collections)
 }
 
 export async function deleteDatabase(path: string): Promise<void> {

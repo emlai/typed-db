@@ -1,29 +1,32 @@
 import { runTestMigration } from './test-utils'
 import { Type } from '../src/types'
 
-test('columns can be added', async () => {
+test('properties can be added', async () => {
   const db = await runTestMigration(db =>
     db
-      .createTable('orders')
-      .addColumn('orders', 'id', Type.string)
-      .addColumn('orders', 'price', Type.number)
+      .createCollection('orders')
+      .addProperty('orders', 'id', Type.string)
+      .addProperty('orders', 'price', Type.number)
   )
 
-  expect(db.tables.orders.columns).toStrictEqual([{ name: 'id', type: 'string' }, { name: 'price', type: 'number' }])
+  expect(db.collections.orders.properties).toStrictEqual([
+    { name: 'id', type: 'string' },
+    { name: 'price', type: 'number' }
+  ])
 })
 
-test('columns can be added after adding rows', async () => {
+test('properties can be added after adding objects', async () => {
   const db = await runTestMigration(db =>
     db
-      .createTable('orders')
-      .addColumn('orders', 'id', Type.string)
-      .addColumn('orders', 'price', Type.number)
+      .createCollection('orders')
+      .addProperty('orders', 'id', Type.string)
+      .addProperty('orders', 'price', Type.number)
       .insertMultiple('orders', [{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
-      .addColumn('orders', 'info', Type.string)
+      .addProperty('orders', 'info', Type.string)
       .update('orders', { info: 'default' })
   )
 
-  expect(db.tables.orders.columns).toStrictEqual([
+  expect(db.collections.orders.properties).toStrictEqual([
     { name: 'id', type: 'string' },
     { name: 'price', type: 'number' },
     { name: 'info', type: 'string' }
