@@ -23,7 +23,6 @@ function createDatabaseInterface<Collections>(
     name,
     collections,
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     createCollection<Name extends string>(name: Name) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const collections = this.collections as any
@@ -32,7 +31,6 @@ function createDatabaseInterface<Collections>(
       return this as any
     },
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     addProperty(collection: keyof Collections, name: string, type: Type) {
       this.collections[collection].properties.push({ name, type })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -77,12 +75,12 @@ export function createDatabase(name: string): Database<{}> {
 }
 
 export async function saveDatabase(db: Database<{}>, path: string): Promise<void> {
-  await writeFile(path, JSON.stringify(db.collections))
+  await writeFile(path, JSON.stringify(db))
 }
 
 export async function loadDatabase<Collections>(path: string): Promise<Database<Collections>> {
   const buffer = await readFile(path)
-  const collections = await JSON.parse(buffer.toString())
+  const { name, collections } = await JSON.parse(buffer.toString())
   return createDatabaseInterface(name, collections)
 }
 

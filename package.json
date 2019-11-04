@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest --watch",
     "test-ci": "jest --ci",
+    "benchmark": "ts-node test/benchmark.ts",
     "check": "tsc --noEmit"
   },
   "repository": {
@@ -32,10 +33,12 @@
     "@typescript-eslint/eslint-plugin": "^2.6.0",
     "@typescript-eslint/parser": "^2.6.0",
     "babel-jest": "^24.9.0",
+    "benchmarkify": "^2.1.2",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.5.0",
     "jest": "^24.9.0",
     "prettier": "1.18.2",
+    "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
   "prettier": {

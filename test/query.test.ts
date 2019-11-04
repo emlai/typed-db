@@ -1,7 +1,6 @@
 import { runTestMigration } from './test-utils'
 import { Type } from '../src/types'
 
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createTestDatabase() {
   return runTestMigration(db =>
     db
