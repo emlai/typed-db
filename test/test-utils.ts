@@ -2,6 +2,7 @@ import { promises as fs } from 'fs'
 import * as path from 'path'
 import * as os from 'os'
 import { createDatabase, deleteDatabase, loadDatabase, saveDatabase } from '../src/db'
+import { Database } from '../src/types'
 
 type Migration<Old, New> = (db: Database<Old>) => Database<New>
 

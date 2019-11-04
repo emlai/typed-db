@@ -1,12 +1,13 @@
 import { runTestMigration } from './test-utils'
+import { Type } from '../src/types'
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function createTestDatabase() {
   return runTestMigration(db =>
     db
       .createTable('orders')
-      .addColumn('orders', 'id', 'string')
-      .addColumn('orders', 'price', 'number')
+      .addColumn('orders', 'id', Type.string)
+      .addColumn('orders', 'price', Type.number)
       .insertMultiple('orders', [{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
   )
 }

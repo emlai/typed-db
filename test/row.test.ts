@@ -1,11 +1,12 @@
 import { runTestMigration } from './test-utils'
+import { Type } from '../src/types'
 
 test('rows can be added', async () => {
   const db = await runTestMigration(db =>
     db
       .createTable('orders')
-      .addColumn('orders', 'id', 'string')
-      .addColumn('orders', 'price', 'number')
+      .addColumn('orders', 'id', Type.string)
+      .addColumn('orders', 'price', Type.number)
       .insert('orders', { id: 'a', price: 1 })
       .insertMultiple('orders', [{ id: 'b', price: 2 }, { id: 'c', price: 2 }])
   )
@@ -17,8 +18,8 @@ test('rows can be updated', async () => {
   const db = await runTestMigration(db =>
     db
       .createTable('orders')
-      .addColumn('orders', 'id', 'string')
-      .addColumn('orders', 'price', 'number')
+      .addColumn('orders', 'id', Type.string)
+      .addColumn('orders', 'price', Type.number)
       .insertMultiple('orders', [{ id: 'a', price: 2 }, { id: 'b', price: 1 }, { id: 'c', price: 2 }])
       .update('orders', { price: 3 })
   )

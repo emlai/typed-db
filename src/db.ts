@@ -1,6 +1,7 @@
 import fs from 'fs'
 import { promisify } from 'util'
 import { matches } from 'lodash'
+import { Database, Table, TablesObject, Type } from './types'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)

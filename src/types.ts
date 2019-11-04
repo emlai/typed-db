@@ -2,9 +2,9 @@ type AddColumn<Tables, TableName extends keyof Tables, Name extends string, Colu
   Tables & { [k in TableName]: Tables[TableName] & { [k in Name]: ColumnType } }
 >
 
-type TablesObject<Tables> = { [k in keyof Tables]: Table<Tables[k]> }
+export type TablesObject<Tables> = { [k in keyof Tables]: Table<Tables[k]> }
 
-interface Database<Tables> {
+export interface Database<Tables> {
   name: string
   tables: TablesObject<Tables>
 
@@ -13,19 +13,13 @@ interface Database<Tables> {
   addColumn<TableName extends keyof Tables, Name extends string>(
     table: TableName,
     name: Name,
-    type: Type
-  ): AddColumn<Tables, TableName, Name, Type>
-
-  addColumn<TableName extends keyof Tables, Name extends string>(
-    table: TableName,
-    name: Name,
-    type: 'number'
+    type: Type.number
   ): AddColumn<Tables, TableName, Name, number>
 
   addColumn<TableName extends keyof Tables, Name extends string>(
     table: TableName,
     name: Name,
-    type: 'string'
+    type: Type.string
   ): AddColumn<Tables, TableName, Name, string>
 
   insert<TableName extends keyof Tables>(table: TableName, row: Tables[TableName]): Database<Tables>
@@ -45,7 +39,7 @@ interface Database<Tables> {
   update<TableName extends keyof Tables>(table: TableName, updates: Partial<Tables[TableName]>): Database<Tables>
 }
 
-interface Table<Row> {
+export interface Table<Row> {
   name: string
   columns: Column[]
   rows: Row[]
@@ -56,4 +50,7 @@ interface Column {
   type: Type
 }
 
-type Type = 'number' | 'string'
+export enum Type {
+  number = 'number',
+  string = 'string'
+}
