@@ -4,7 +4,8 @@ type AddProperty<Collections, CollectionName extends keyof Collections, Name ext
 
 export type CollectionsMap<Collections> = { [k in keyof Collections]: Collection<Collections[k]> }
 
-export interface Database<Collections> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export interface Database<Collections = any> {
   name: string
   collections: CollectionsMap<Collections>
 
