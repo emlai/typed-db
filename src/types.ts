@@ -41,6 +41,8 @@ interface Database<Tables> {
     table: TableName,
     conditions: Partial<Tables[TableName]>
   ): readonly (Tables[TableName])[]
+
+  update<TableName extends keyof Tables>(table: TableName, updates: Partial<Tables[TableName]>): Database<Tables>
 }
 
 interface Table<Row> {

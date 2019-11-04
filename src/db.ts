@@ -1,6 +1,6 @@
 import fs from 'fs'
 import { promisify } from 'util'
-import _ from 'lodash'
+import { matches } from 'lodash'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
@@ -14,10 +14,7 @@ function createTableInterface(name: string): Table<{}> {
   }
 }
 
-function createDatabaseInterface<Tables>(
-  name: string,
-  tables: TablesObject<Tables>
-): Database<Tables> {
+function createDatabaseInterface<Tables>(name: string, tables: TablesObject<Tables>): Database<Tables> {
   return {
     name,
     tables,
@@ -43,13 +40,24 @@ function createDatabaseInterface<Tables>(
       return this
     },
 
-    insertMultiple<TableName extends keyof Tables>(table: TableName, rows: readonly (Tables[TableName])[]): Database<Tables> {
+    insertMultiple<TableName extends keyof Tables>(
+      table: TableName,
+      rows: readonly (Tables[TableName])[]
+    ): Database<Tables> {
       this.tables[table].rows.push(...rows)
       return this
     },
 
-    getAll<TableName extends keyof Tables>(table: TableName, conditions?: Partial<Tables[TableName]>): readonly (Tables[TableName])[] {
-      return this.tables[table].rows.filter(_.matches(conditions))
+    getAll<TableName extends keyof Tables>(
+      table: TableName,
+      conditions?: Partial<Tables[TableName]>
+    ): readonly (Tables[TableName])[] {
+      return this.tables[table].rows.filter(matches(conditions))
+    },
+
+    update<TableName extends keyof Tables>(table: TableName, updates: Partial<Tables[TableName]>): Database<Tables> {
+      this.tables[table].rows.forEach(row => Object.assign(row, updates))
+      return this
     }
   }
 }
