@@ -5,9 +5,9 @@ function createTestDatabase() {
   return runTestMigration(db =>
     db
       .createCollection('orders')
-      .addProperty('orders', 'id', Type.string)
-      .addProperty('orders', 'price', Type.number)
-      .insertMultiple('orders', [{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
+      .orders.addProperty('id', Type.string)
+      .orders.addProperty('price', Type.number)
+      .orders.insertMultiple([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
   )
 }
 
@@ -19,10 +19,10 @@ describe('queries', () => {
   })
 
   test('getAll', () => {
-    expect(db.getAll('orders')).toStrictEqual([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
+    expect(db.orders.getAll()).toStrictEqual([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
   })
 
   test('getAll with condition', () => {
-    expect(db.getAll('orders', { price: 2 })).toStrictEqual([{ id: 'b', price: 2 }, { id: 'c', price: 2 }])
+    expect(db.orders.getAll({ price: 2 })).toStrictEqual([{ id: 'b', price: 2 }, { id: 'c', price: 2 }])
   })
 })

@@ -10,13 +10,13 @@ async function main() {
   const { dbPath, db: createdDb } = await createTestDatabase()
   const db = createdDb
     .createCollection('orders')
-    .addProperty('orders', 'price', Type.number)
-    .addProperty('orders', 'discount', Type.number)
-    .addProperty('orders', 'name', Type.string)
-    .addProperty('orders', 'description', Type.string)
-    .addProperty('orders', 'date', Type.string)
-    .addProperty('orders', 'customer', Type.string)
-    .addProperty('orders', 'salesperson', Type.string)
+    .orders.addProperty('price', Type.number)
+    .orders.addProperty('discount', Type.number)
+    .orders.addProperty('name', Type.string)
+    .orders.addProperty('description', Type.string)
+    .orders.addProperty('date', Type.string)
+    .orders.addProperty('customer', Type.string)
+    .orders.addProperty('salesperson', Type.string)
   await saveDatabase(db, dbPath)
   type Db = typeof db
 
@@ -36,7 +36,7 @@ async function main() {
   suite.add('insert', async (done: Function) => {
     for (const object of objects) {
       const db: Db = await loadDatabase(dbPath)
-      db.insert('orders', object)
+      db.orders.insert(object)
       await saveDatabase(db, dbPath)
     }
     done()
@@ -44,7 +44,7 @@ async function main() {
 
   suite.add('insertMultiple', async (done: Function) => {
     const db: Db = await loadDatabase(dbPath)
-    db.insertMultiple('orders', objects)
+    db.orders.insertMultiple(objects)
     await saveDatabase(db, dbPath)
     done()
   })

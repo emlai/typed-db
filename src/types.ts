@@ -1,58 +1,45 @@
-type AddProperty<Collections, CollectionName extends keyof Collections, Name extends string, propertyType> = Database<
-  Collections & { [k in CollectionName]: Collections[CollectionName] & { [k in Name]: propertyType } }
+type AddProperty<Collections, CollectionName extends keyof Collections, Name extends string, PropertyType> = Database<
+  Collections & { [k in CollectionName]: Collections[CollectionName] & { [k in Name]: PropertyType } }
 >
 
-export type CollectionsMap<Collections> = { [k in keyof Collections]: Collection<Collections[k]> }
+export type CollectionsMap<Collections> = { [k in keyof Collections]: Collection<Collections[k], Collections, k> }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export interface Database<Collections = any> {
+export type Database<Collections = any> = CollectionsMap<Collections> & {
   name: string
-  collections: CollectionsMap<Collections>
 
   createCollection<Name extends string>(name: Name): Database<Collections & { [k in Name]: {} }>
+}
 
-  addProperty<CollectionName extends keyof Collections, Name extends string>(
-    collection: CollectionName,
+export interface CollectionData<ObjectType> {
+  readonly properties: Property[]
+  objects: ObjectType[] // TODO: Make this private.
+}
+
+export interface Collection<ObjectType, Collections, CollectionName extends keyof Collections>
+  extends CollectionData<ObjectType> {
+  addProperty<Name extends string>(
     name: Name,
     type: Type.number
   ): AddProperty<Collections, CollectionName, Name, number>
 
-  addProperty<CollectionName extends keyof Collections, Name extends string>(
-    collection: CollectionName,
+  addProperty<Name extends string>(
     name: Name,
     type: Type.string
   ): AddProperty<Collections, CollectionName, Name, string>
 
-  insert<CollectionName extends keyof Collections>(
-    collection: CollectionName,
-    object: Collections[CollectionName]
-  ): Database<Collections>
+  insert(object: ObjectType): Database<Collections>
 
-  insertMultiple<CollectionName extends keyof Collections>(
-    collection: CollectionName,
-    objects: readonly (Collections[CollectionName])[]
-  ): Database<Collections>
+  insertMultiple(objects: readonly ObjectType[]): Database<Collections>
 
-  getAll<CollectionName extends keyof Collections>(collection: CollectionName): readonly (Collections[CollectionName])[]
+  getAll(): ObjectType[]
 
-  getAll<CollectionName extends keyof Collections>(
-    collection: CollectionName,
-    conditions: Partial<Collections[CollectionName]>
-  ): readonly (Collections[CollectionName])[]
+  getAll(conditions: Partial<ObjectType>): ObjectType[]
 
-  update<CollectionName extends keyof Collections>(
-    collection: CollectionName,
-    updates: Partial<Collections[CollectionName]>
-  ): Database<Collections>
+  update(updates: Partial<ObjectType>): Database<Collections>
 }
 
-export interface Collection<ObjectType> {
-  name: string
-  properties: Property[]
-  objects: ObjectType[]
-}
-
-interface Property {
+export interface Property {
   name: string
   type: Type
 }

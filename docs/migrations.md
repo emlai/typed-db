@@ -6,12 +6,12 @@ TypedDB has first-class support for migrations. Here is an example of a TypedDB 
 import { Database, Type } from 'typed-db'
 
 export function up(db: Database) {
-  db.addProperty('orders', 'discount', Type.number)
-    .update('orders', { discount: 0 })
+  db.orders.addProperty('discount', Type.number)
+    .orders.update({ discount: 0 })
 }
 
 export function down(db: Database) {
-  db.removeProperty('orders', 'discount')
+  db.orders.removeProperty('discount')
 }
 ```
 

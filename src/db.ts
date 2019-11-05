@@ -1,87 +1,75 @@
 import fs from 'fs'
 import { promisify } from 'util'
 import { matches } from 'lodash'
-import { Database, Collection, CollectionsMap, Type } from './types'
+import { Database, Collection, Type, CollectionData } from './types'
 
 const writeFile = promisify(fs.writeFile)
 const readFile = promisify(fs.readFile)
 const unlink = promisify(fs.unlink)
 
-function createCollectionInterface(name: string): Collection<{}> {
+function createDatabaseInterface<Collections>(name: string): Database<{}> {
   return {
     name,
-    properties: [],
-    objects: []
-  }
-}
-
-function createDatabaseInterface<Collections>(
-  name: string,
-  collections: CollectionsMap<Collections>
-): Database<Collections> {
-  return {
-    name,
-    collections,
 
     createCollection<Name extends string>(name: Name) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const collections = this.collections as any
-      collections[name] = createCollectionInterface(name)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return this as any
+      const self = this as any
+      self[name] = createCollectionInterface(this, { properties: [], objects: [] })
+      return self
+    }
+  }
+}
+
+function createCollectionInterface<ObjectType, Collections, CollectionName extends keyof Collections>(
+  db: Database,
+  data: CollectionData<ObjectType>
+): Collection<ObjectType, Collections, CollectionName> {
+  return {
+    ...data, // TODO(optimize): Assign to 'data' instead of creating a new object.
+
+    addProperty(name: string, type: Type) {
+      this.properties.push({ name, type })
+      return db
     },
 
-    addProperty(collection: keyof Collections, name: string, type: Type) {
-      this.collections[collection].properties.push({ name, type })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return this as any
+    insert(object: ObjectType) {
+      this.objects.push(object)
+      return db
     },
 
-    insert<CollectionName extends keyof Collections>(
-      collection: CollectionName,
-      object: Collections[CollectionName]
-    ): Database<Collections> {
-      this.collections[collection].objects.push(object)
-      return this
+    insertMultiple(objects: readonly ObjectType[]) {
+      this.objects.push(...objects)
+      return db
     },
 
-    insertMultiple<CollectionName extends keyof Collections>(
-      collection: CollectionName,
-      objects: readonly (Collections[CollectionName])[]
-    ): Database<Collections> {
-      this.collections[collection].objects.push(...objects)
-      return this
+    getAll(conditions?: Partial<ObjectType>) {
+      return this.objects.filter(matches(conditions))
     },
 
-    getAll<CollectionName extends keyof Collections>(
-      collection: CollectionName,
-      conditions?: Partial<Collections[CollectionName]>
-    ): readonly (Collections[CollectionName])[] {
-      return this.collections[collection].objects.filter(matches(conditions))
-    },
-
-    update<CollectionName extends keyof Collections>(
-      collection: CollectionName,
-      updates: Partial<Collections[CollectionName]>
-    ): Database<Collections> {
-      this.collections[collection].objects.forEach(object => Object.assign(object, updates))
-      return this
+    update(updates: Partial<ObjectType>) {
+      this.objects.forEach(object => Object.assign(object, updates))
+      return db
     }
   }
 }
 
 export function createDatabase(name: string): Database<{}> {
-  return createDatabaseInterface(name, {})
+  return createDatabaseInterface(name)
 }
 
-export async function saveDatabase(db: Database<{}>, path: string): Promise<void> {
+export async function saveDatabase(db: Database, path: string): Promise<void> {
   await writeFile(path, JSON.stringify(db))
 }
 
 export async function loadDatabase<Collections>(path: string): Promise<Database<Collections>> {
   const buffer = await readFile(path)
-  const { name, collections } = await JSON.parse(buffer.toString())
-  return createDatabaseInterface(name, collections)
+  const { name, ...collectionsData } = await JSON.parse(buffer.toString())
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const db = createDatabaseInterface(name) as any
+  for (const key in collectionsData) {
+    db[key] = createCollectionInterface(db, collectionsData[key])
+  }
+  return db
 }
 
 export async function deleteDatabase(path: string): Promise<void> {
