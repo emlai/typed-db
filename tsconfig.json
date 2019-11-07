@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "es5",
+    "lib": ["es5"],
     "module": "commonjs",
     "isolatedModules": true,
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
+    "noUnusedParameters": true,
     "esModuleInterop": true
   }
 }

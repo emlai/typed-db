@@ -1,9 +1,12 @@
 import { runTestMigration } from './test-utils'
 
 test('collections can be created', async () => {
-  const db = await runTestMigration(db => db.createCollection('orders').createCollection('customers'))
+  const db = await runTestMigration(db =>
+    db.createCollection('orders')
+      .createCollection('customers')
+  )
   expect(db).toMatchObject({
-    orders: { properties: [], objects: [] },
-    customers: { properties: [], objects: [] }
+    orders: { properties: [] },
+    customers: { properties: [] }
   })
 })

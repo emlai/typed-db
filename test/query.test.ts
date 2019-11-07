@@ -3,11 +3,14 @@ import { Type } from '../src/types'
 
 function createTestDatabase() {
   return runTestMigration(db =>
-    db
-      .createCollection('orders')
+    db.createCollection('orders')
       .orders.addProperty('id', Type.string)
       .orders.addProperty('price', Type.number)
-      .orders.insertMultiple([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
+      .orders.insertMultiple([
+        { id: 'b', price: 2 },
+        { id: 'a', price: 1 },
+        { id: 'c', price: 2 }
+      ])
   )
 }
 
@@ -18,11 +21,18 @@ describe('queries', () => {
     db = await createTestDatabase()
   })
 
-  test('getAll', () => {
-    expect(db.orders.getAll()).toStrictEqual([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
+  test('getAll', async () => {
+    expect(await db.orders.getAll()).toStrictEqual([
+      { id: 'b', price: 2 },
+      { id: 'a', price: 1 },
+      { id: 'c', price: 2 }
+    ])
   })
 
-  test('getAll with condition', () => {
-    expect(db.orders.getAll({ price: 2 })).toStrictEqual([{ id: 'b', price: 2 }, { id: 'c', price: 2 }])
+  test('getAll with condition', async () => {
+    expect(await db.orders.getAll({ price: 2 })).toStrictEqual([
+      { id: 'b', price: 2 },
+      { id: 'c', price: 2 }
+    ])
   })
 })

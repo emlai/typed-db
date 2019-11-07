@@ -1,23 +1,27 @@
-type AddProperty<Collections, CollectionName extends keyof Collections, Name extends string, PropertyType> = Database<
-  Collections & { [k in CollectionName]: Collections[CollectionName] & { [k in Name]: PropertyType } }
->
+import { Query } from './query'
+
+type AddProperty<Collections, CollectionName extends keyof Collections, Name extends string, PropertyType> =
+  QueryBuilder<Collections & { [k in CollectionName]: Collections[CollectionName] & { [k in Name]: PropertyType } }>
 
 export type CollectionsMap<Collections> = { [k in keyof Collections]: Collection<Collections[k], Collections, k> }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Database<Collections = any> = CollectionsMap<Collections> & {
+  collections: CollectionsMap<Collections>
   name: string
+  _path: string
 
-  createCollection<Name extends string>(name: Name): Database<Collections & { [k in Name]: {} }>
+  createCollection<Name extends string>(name: Name): QueryBuilder<Collections & { [k in Name]: {} }>
 }
 
-export interface CollectionData<ObjectType> {
+export type QueryBuilder<Collections> = Database<Collections> & {
+  _queries: Query[]
+
+  save(): Promise<void>
+}
+
+export interface Collection<ObjectType, Collections, CollectionName extends keyof Collections> {
   readonly properties: Property[]
-  objects: ObjectType[] // TODO: Make this private.
-}
 
-export interface Collection<ObjectType, Collections, CollectionName extends keyof Collections>
-  extends CollectionData<ObjectType> {
   addProperty<Name extends string>(
     name: Name,
     type: Type.number
@@ -28,15 +32,13 @@ export interface Collection<ObjectType, Collections, CollectionName extends keyo
     type: Type.string
   ): AddProperty<Collections, CollectionName, Name, string>
 
-  insert(object: ObjectType): Database<Collections>
+  insert(object: ObjectType): QueryBuilder<Collections>
 
-  insertMultiple(objects: readonly ObjectType[]): Database<Collections>
+  insertMultiple(objects: readonly ObjectType[]): QueryBuilder<Collections>
 
-  getAll(): ObjectType[]
+  getAll(conditions?: Partial<ObjectType>): Promise<ObjectType[]>
 
-  getAll(conditions: Partial<ObjectType>): ObjectType[]
-
-  update(updates: Partial<ObjectType>): Database<Collections>
+  update(updates: Partial<ObjectType>): QueryBuilder<Collections>
 }
 
 export interface Property {

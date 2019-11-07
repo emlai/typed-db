@@ -1,77 +1,73 @@
-import fs from 'fs'
-import { promisify } from 'util'
-import { matches } from 'lodash'
-import { Database, Collection, Type, CollectionData } from './types'
+import { Collection, CollectionsMap, Database, Property, QueryBuilder, Type } from './types'
+import { executeQuery, Query, QueryKind } from './query'
 
-const writeFile = promisify(fs.writeFile)
-const readFile = promisify(fs.readFile)
-const unlink = promisify(fs.unlink)
-
-function createDatabaseInterface<Collections>(name: string): Database<{}> {
+export function createQueryBuilder<Collections>(db: Database<Collections>): QueryBuilder<Collections> {
   return {
-    name,
+    ...db,
+    _queries: [],
 
     createCollection<Name extends string>(name: Name) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const self = this as any
-      self[name] = createCollectionInterface(this, { properties: [], objects: [] })
-      return self
+      (this as any)[name] = createCollectionInterface(this, this, name, [])
+      this._queries.push({ kind: QueryKind.createCollection, name })
+      return this as any
+    },
+
+    save() {
+      return executeQuery(this)
     }
   }
 }
 
-function createCollectionInterface<ObjectType, Collections, CollectionName extends keyof Collections>(
-  db: Database,
-  data: CollectionData<ObjectType>
-): Collection<ObjectType, Collections, CollectionName> {
+export function createDatabaseInterface<Collections>(
+  name: string,
+  dbPath: string,
+  collections: CollectionsMap<Collections>
+): Database<Collections> {
   return {
-    ...data, // TODO(optimize): Assign to 'data' instead of creating a new object.
+    ...collections,
+    collections,
+    name,
+    _path: dbPath,
+
+    createCollection<Name extends string>(name: Name) {
+      return createQueryBuilder(this).createCollection(name)
+    }
+  }
+}
+
+export function createCollectionInterface<ObjectType, Collections, CollectionName extends keyof Collections>(
+  qb: QueryBuilder<Collections> | null,
+  db: Database<Collections>,
+  collection: string,
+  properties: Property[]
+): Collection<ObjectType, Collections, CollectionName> {
+  const pushQuery = (query: Query) => {
+    const queryBuilder = qb || createQueryBuilder(db)
+    queryBuilder._queries.push(query)
+    return queryBuilder
+  }
+
+  return {
+    properties,
 
     addProperty(name: string, type: Type) {
-      this.properties.push({ name, type })
-      return db
+      return pushQuery({ kind: QueryKind.addProperty, collection, property: { name, type } }) as any
     },
 
     insert(object: ObjectType) {
-      this.objects.push(object)
-      return db
+      return pushQuery({ kind: QueryKind.insert, collection, objects: [object] })
     },
 
     insertMultiple(objects: readonly ObjectType[]) {
-      this.objects.push(...objects)
-      return db
+      return pushQuery({ kind: QueryKind.insert, collection, objects })
     },
 
     getAll(conditions?: Partial<ObjectType>) {
-      return this.objects.filter(matches(conditions))
+      return executeQuery(pushQuery({ kind: QueryKind.getAll, collection, conditions }))
     },
 
     update(updates: Partial<ObjectType>) {
-      this.objects.forEach(object => Object.assign(object, updates))
-      return db
+      return pushQuery({ kind: QueryKind.update, collection, updates })
     }
   }
-}
-
-export function createDatabase(name: string): Database<{}> {
-  return createDatabaseInterface(name)
-}
-
-export async function saveDatabase(db: Database, path: string): Promise<void> {
-  await writeFile(path, JSON.stringify(db))
-}
-
-export async function loadDatabase<Collections>(path: string): Promise<Database<Collections>> {
-  const buffer = await readFile(path)
-  const { name, ...collectionsData } = await JSON.parse(buffer.toString())
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const db = createDatabaseInterface(name) as any
-  for (const key in collectionsData) {
-    db[key] = createCollectionInterface(db, collectionsData[key])
-  }
-  return db
-}
-
-export async function deleteDatabase(path: string): Promise<void> {
-  await unlink(path)
 }
