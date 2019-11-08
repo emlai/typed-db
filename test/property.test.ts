@@ -19,7 +19,7 @@ test('properties can be added after adding objects', async () => {
     db.createCollection('orders')
       .orders.addProperty('id', Type.string)
       .orders.addProperty('price', Type.number)
-      .orders.insertMultiple([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
+      .orders.insertMany([{ id: 'b', price: 2 }, { id: 'a', price: 1 }, { id: 'c', price: 2 }])
       .orders.addProperty('info', Type.string)
       .orders.update({ info: 'default' })
   )
@@ -29,7 +29,7 @@ test('properties can be added after adding objects', async () => {
     { name: 'price', type: 'number' },
     { name: 'info', type: 'string' }
   ])
-  expect(await db.orders.getAll()).toStrictEqual([
+  expect(await db.orders.findAll()).toStrictEqual([
     { id: 'b', price: 2, info: 'default' },
     { id: 'a', price: 1, info: 'default' },
     { id: 'c', price: 2, info: 'default' }

@@ -58,12 +58,12 @@ export function createCollectionInterface<ObjectType, Collections, CollectionNam
       return pushQuery({ kind: QueryKind.insert, collection, objects: [object] })
     },
 
-    insertMultiple(objects: readonly ObjectType[]) {
+    insertMany(objects: readonly ObjectType[]) {
       return pushQuery({ kind: QueryKind.insert, collection, objects })
     },
 
-    getAll(conditions?: Partial<ObjectType>) {
-      return executeQuery(pushQuery({ kind: QueryKind.getAll, collection, conditions }))
+    findAll(conditions?: Partial<ObjectType>) {
+      return executeQuery(pushQuery({ kind: QueryKind.findAll, collection, conditions }))
     },
 
     update(updates: Partial<ObjectType>) {

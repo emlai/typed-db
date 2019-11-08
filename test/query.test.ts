@@ -6,7 +6,7 @@ function createTestDatabase() {
     db.createCollection('orders')
       .orders.addProperty('id', Type.string)
       .orders.addProperty('price', Type.number)
-      .orders.insertMultiple([
+      .orders.insertMany([
         { id: 'b', price: 2 },
         { id: 'a', price: 1 },
         { id: 'c', price: 2 }
@@ -21,16 +21,16 @@ describe('queries', () => {
     db = await createTestDatabase()
   })
 
-  test('getAll', async () => {
-    expect(await db.orders.getAll()).toStrictEqual([
+  test('findAll', async () => {
+    expect(await db.orders.findAll()).toStrictEqual([
       { id: 'b', price: 2 },
       { id: 'a', price: 1 },
       { id: 'c', price: 2 }
     ])
   })
 
-  test('getAll with condition', async () => {
-    expect(await db.orders.getAll({ price: 2 })).toStrictEqual([
+  test('findAll with condition', async () => {
+    expect(await db.orders.findAll({ price: 2 })).toStrictEqual([
       { id: 'b', price: 2 },
       { id: 'c', price: 2 }
     ])

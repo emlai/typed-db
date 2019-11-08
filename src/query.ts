@@ -7,7 +7,7 @@ export enum QueryKind {
   createCollection = 'createCollection',
   addProperty = 'addProperty',
   insert = 'insert',
-  getAll = 'getAll',
+  findAll = 'findAll',
   update = 'update'
 }
 
@@ -27,7 +27,7 @@ export type Query =
     objects: readonly any[]
   }
   | {
-    kind: QueryKind.getAll
+    kind: QueryKind.findAll
     collection: string
     conditions?: object
   }
@@ -53,7 +53,7 @@ export async function executeQuery(queryBuilder: QueryBuilder<any>): Promise<any
       case QueryKind.insert:
         db.collections[query.collection].objects.push(...query.objects)
         break
-      case QueryKind.getAll:
+      case QueryKind.findAll:
         result = db.collections[query.collection].objects.filter(matches(query.conditions))
         break
       case QueryKind.update:

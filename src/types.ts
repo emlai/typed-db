@@ -34,9 +34,9 @@ export interface Collection<ObjectType, Collections, CollectionName extends keyo
 
   insert(object: ObjectType): QueryBuilder<Collections>
 
-  insertMultiple(objects: readonly ObjectType[]): QueryBuilder<Collections>
+  insertMany(objects: readonly ObjectType[]): QueryBuilder<Collections>
 
-  getAll(conditions?: Partial<ObjectType>): Promise<ObjectType[]>
+  findAll(conditions?: Partial<ObjectType>): Promise<ObjectType[]>
 
   update(updates: Partial<ObjectType>): QueryBuilder<Collections>
 }

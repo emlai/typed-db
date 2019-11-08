@@ -38,8 +38,8 @@ async function main() {
     done()
   })
 
-  suite.add('insertMultiple', async (done: Function) => {
-    await db.orders.insertMultiple(objects).save()
+  suite.add('insertMany', async (done: Function) => {
+    await db.orders.insertMany(objects).save()
     done()
   })
 
