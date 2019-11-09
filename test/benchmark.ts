@@ -1,12 +1,10 @@
 // @ts-ignore
-import Benchmarkify from 'benchmarkify'
+import benchmark from 'nodemark'
 import { runTestMigration } from './test-utils'
 import { Type } from '../src/types'
 import { deleteDatabase } from '../src/storage'
 
 async function main() {
-  const benchmark = new Benchmarkify('typed-db benchmark').printHeader()
-
   const db = await runTestMigration(db =>
     db.createCollection('orders')
       .orders.addProperty('price', Type.number)
@@ -18,10 +16,8 @@ async function main() {
       .orders.addProperty('salesperson', Type.string)
   )
 
-  const suite = benchmark.createSuite('Increment integer', { cycles: 10 })
-
   const randomString = () => Math.random().toString(36)
-  const objects = Array.from({ length: 5 }, () => ({
+  const objects = Array.from({ length: 100 }, () => ({
     price: Math.random() * 5000,
     discount: Math.random() < 0.01 ? 20 : 0,
     name: randomString(),
@@ -31,19 +27,26 @@ async function main() {
     salesperson: randomString()
   }))
 
-  suite.add('insert', async (done: Function) => {
+  const tests: Record<string, Function> = {}
+
+  tests.insert = async () => {
     for (const object of objects) {
       await db.orders.insert(object).save()
     }
-    done()
-  })
+  }
 
-  suite.add('insertMany', async (done: Function) => {
+  tests.insertMany = async () => {
     await db.orders.insertMany(objects).save()
-    done()
-  })
+  }
 
-  await suite.run()
+  const maxKeyLength = Math.max(...Object.keys(tests).map(key => key.length))
+
+  for (const key in tests) {
+    const test = tests[key]
+    const result = await benchmark((done: Function) => test().then(done))
+    console.log(key.padEnd(maxKeyLength), result.toString('milliseconds'))
+  }
+
   await deleteDatabase(db)
 }
 
